@@ -1,0 +1,2 @@
+[functions.ride-demo]
+verify_jwt = false
