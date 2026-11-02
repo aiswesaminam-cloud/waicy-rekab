@@ -1,8 +1,112 @@
-<script
-  id="retell-widget"
-  src="https://dashboard.retellai.com/retell-widget-v2.js"
-  data-voice-public-key="public_key_b4166767a591c51e7a37d"
-  data-voice-agent-id="agent_d2cd2d0a39ed74e304a68f29ad"
-  data-title="Rekab AI Assistant"
-  data-fab-text="Talk to Rekab AI"
-></script>
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Rekab AI</title>
+    <link rel="stylesheet" href="./styles.css" />
+    <meta property="og:image" content="https://bolt.new/static/og_default.png">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content="https://bolt.new/static/og_default.png">
+  </head>
+  <body>
+    <script
+      id="retell-widget"
+      src="https://dashboard.retellai.com/retell-widget-v2.js"
+      data-voice-public-key="public_key_b4166767a591c51e7a37d"
+      data-voice-agent-id="agent_d2cd2d0a39ed74e304a68f29ad"
+      data-title="Rekab AI Assistant"
+      data-fab-text="Talk to Rekab AI"
+    ></script>
+    <main class="page">
+      <header class="topbar">
+        <span class="brand">Rekab</span>
+        <span class="tag">AI ride demo</span>
+      </header>
+
+      <section class="panel" id="panel" data-view="idle" aria-live="polite">
+        <div class="error" id="error" role="alert" hidden></div>
+
+        <div class="route" id="route" hidden>
+          <div class="route-row">
+            <span class="route-dot route-dot-pickup" aria-hidden="true"></span>
+            <div>
+              <p class="route-label">Pickup</p>
+              <p class="route-value" id="pickup"></p>
+            </div>
+          </div>
+          <div class="route-row">
+            <span class="route-dot route-dot-destination" aria-hidden="true"></span>
+            <div>
+              <p class="route-label">Destination</p>
+              <p class="route-value" id="destination"></p>
+            </div>
+          </div>
+        </div>
+
+        <div class="view" data-for="idle">
+          <h1 class="title">Ask Rekab AI for a ride</h1>
+          <p class="body-text">
+            Use the Rekab AI assistant to tell it where you are and where you want to go.
+            Your search will appear here as soon as it starts.
+          </p>
+        </div>
+
+        <div class="view" data-for="searching">
+          <div class="spinner" aria-hidden="true"></div>
+          <h2 class="title" id="search-message">Looking for available rides...</h2>
+          <p class="body-text">
+            Elapsed <span class="mono" id="elapsed">0</span>s
+          </p>
+          <p class="note">Simulated demo. No real drivers are involved.</p>
+          <button class="btn btn-ghost" type="button" id="cancel-button">Cancel search</button>
+        </div>
+
+        <div class="view" data-for="ride_found">
+          <p class="eyebrow">Simulated</p>
+          <h2 class="title">Ride Found!</h2>
+          <dl class="ride-card">
+            <div>
+              <dt>Driver</dt>
+              <dd id="driver-name"></dd>
+            </div>
+            <div>
+              <dt>Vehicle</dt>
+              <dd id="vehicle"></dd>
+            </div>
+            <div>
+              <dt>Plate</dt>
+              <dd class="mono" id="plate"></dd>
+            </div>
+            <div>
+              <dt>Arrives in</dt>
+              <dd id="eta"></dd>
+            </div>
+          </dl>
+          <p class="note">Driver and vehicle details are fictional.</p>
+          <div class="actions">
+            <button class="btn btn-primary" type="button" id="confirm-button">Confirm booking</button>
+            <button class="btn btn-ghost" type="button" id="cancel-found-button">Cancel</button>
+          </div>
+        </div>
+
+        <div class="view" data-for="cancelled">
+          <h2 class="title">Search cancelled</h2>
+          <p class="body-text">This simulated search has been cancelled. No booking was made.</p>
+          <button class="btn btn-primary" type="button" data-reset>Search again</button>
+        </div>
+
+        <div class="view" data-for="booked">
+          <p class="eyebrow">Simulated</p>
+          <h2 class="title">Booking confirmed</h2>
+          <p class="body-text">
+            Reference <span class="mono" id="booking-reference"></span>
+          </p>
+          <p class="note">This is a demo booking. No real ride was arranged.</p>
+          <button class="btn btn-primary" type="button" data-reset>Book another ride</button>
+        </div>
+      </section>
+    </main>
+    <script type="module" src="./app.js"></script>
+  </body>
+</html>

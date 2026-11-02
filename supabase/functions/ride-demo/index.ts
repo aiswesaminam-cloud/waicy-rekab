@@ -7,7 +7,8 @@ const corsHeaders = {
 };
 
 const TABLE = "ride_demo_searches";
-const ACTIONS = ["start_ride_search", "check_search_status", "cancel_ride_search", "confirm_demo_booking"];
+const ACTIONS = ["start_ride_search", "check_search_status", "cancel_ride_search", "confirm_demo_booking", "get_latest_search"];
+const ACTIVE_WINDOW_MINUTES = 10;
 const DRIVER_NAMES = ["Omar A.", "Layla M.", "Khalid R.", "Sara N.", "Youssef T.", "Mariam H.", "Tariq S.", "Noor F."];
 const VEHICLES = ["Silver Toyota Corolla", "White Hyundai Elantra", "Black Kia Cerato", "Grey Nissan Sunny", "Blue Honda Civic"];
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -202,11 +203,28 @@ async function confirmDemoBooking(body: Record<string, unknown>) {
   return json({ success: true, ...searchSummary(updated) });
 }
 
+async function getLatestSearch() {
+  const since = new Date(Date.now() - ACTIVE_WINDOW_MINUTES * 60 * 1000).toISOString();
+  const { data, error } = await db
+    .from(TABLE)
+    .select("*")
+    .in("status", ["searching", "ride_found"])
+    .gte("created_at", since)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  if (error) throw error;
+  if (!data) return json({ success: true, simulated: true, search: null });
+  const row = await advanceIfReady(data as SearchRow);
+  return json({ success: true, simulated: true, search: searchSummary(row) });
+}
+
 const HANDLERS: Record<string, (body: Record<string, unknown>) => Promise<Response>> = {
   start_ride_search: startRideSearch,
   check_search_status: checkSearchStatus,
   cancel_ride_search: cancelRideSearch,
   confirm_demo_booking: confirmDemoBooking,
+  get_latest_search: getLatestSearch,
 };
 
 Deno.serve(async (req: Request) => {
