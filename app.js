@@ -198,5 +198,13 @@ panel.querySelectorAll("[data-reset]").forEach((button) => {
   button.addEventListener("click", resetSearch);
 });
 
+const assistantToggle = document.getElementById("assistant-toggle");
+const assistantHint = document.getElementById("assistant-hint");
+assistantToggle.addEventListener("click", () => {
+  const active = assistantToggle.getAttribute("aria-pressed") !== "true";
+  assistantToggle.setAttribute("aria-pressed", String(active));
+  assistantHint.hidden = !active;
+});
+
 render();
 schedulePoll(0);
