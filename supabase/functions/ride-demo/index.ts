@@ -9,6 +9,7 @@ const corsHeaders = {
 const TABLE = "ride_demo_searches";
 const ACTIONS = ["start_ride_search", "check_search_status", "cancel_ride_search", "confirm_demo_booking", "get_latest_search"];
 const ACTIVE_WINDOW_MINUTES = 10;
+const MAX_PASSENGERS = 4;
 const DRIVER_NAMES = ["Omar A.", "Layla M.", "Khalid R.", "Sara N.", "Youssef T.", "Mariam H.", "Tariq S.", "Noor F."];
 const VEHICLES = ["Silver Toyota Corolla", "White Hyundai Elantra", "Black Kia Cerato", "Grey Nissan Sunny", "Blue Honda Civic"];
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -30,6 +31,7 @@ type SearchRow = {
   plate: string | null;
   eta_minutes: number | null;
   booking_reference: string | null;
+  passenger_count: number;
   created_at: string;
 };
 
@@ -67,6 +69,14 @@ function readLocation(value: unknown, field: string): string {
     throw new DemoError(400, "invalid_input", `"${field}" must be between 3 and 200 characters.`);
   }
   return trimmed;
+}
+
+function readPassengerCount(value: unknown, fallback: number): number {
+  if (value === undefined || value === null) return fallback;
+  if (typeof value !== "number" || !Number.isInteger(value) || value < 1 || value > MAX_PASSENGERS) {
+    throw new DemoError(400, "invalid_input", `"passenger_count" must be a whole number from 1 to ${MAX_PASSENGERS}.`);
+  }
+  return value;
 }
 
 function readSearchId(value: unknown): string {
@@ -122,6 +132,7 @@ function searchSummary(row: SearchRow) {
     destination: row.destination,
     elapsed_seconds: Math.max(0, Math.floor((Date.now() - new Date(row.created_at).getTime()) / 1000)),
     message: STATUS_MESSAGES[row.status],
+    passenger_count: row.passenger_count,
   };
   if (row.status === "ride_found" || row.status === "booked") {
     summary.ride = {
@@ -144,10 +155,11 @@ async function startRideSearch(body: Record<string, unknown>) {
   if (pickup.toLowerCase() === destination.toLowerCase()) {
     throw new DemoError(400, "invalid_input", "Pickup and destination must be different.");
   }
+  const passengerCount = readPassengerCount(body.passenger_count, 1);
   const readyAt = new Date(Date.now() + randomInt(6, 9) * 1000).toISOString();
   const { data, error } = await db
     .from(TABLE)
-    .insert({ pickup, destination, status: "searching", ready_at: readyAt })
+    .insert({ pickup, destination, status: "searching", ready_at: readyAt, passenger_count: passengerCount })
     .select("*")
     .single();
   if (error) throw error;
@@ -190,10 +202,16 @@ async function confirmDemoBooking(body: Record<string, unknown>) {
   if (row.status === "searching") {
     throw new DemoError(409, "ride_not_found_yet", "No simulated ride has been found yet. Please wait for the search to finish.");
   }
+  const passengerCount = readPassengerCount(body.passenger_count, row.passenger_count);
   const bookingReference = `DEMO-${crypto.randomUUID().slice(0, 8).toUpperCase()}`;
   const { data, error } = await db
     .from(TABLE)
-    .update({ status: "booked", booking_reference: bookingReference, updated_at: new Date().toISOString() })
+    .update({
+      status: "booked",
+      booking_reference: bookingReference,
+      passenger_count: passengerCount,
+      updated_at: new Date().toISOString(),
+    })
     .eq("id", row.id)
     .eq("status", "ride_found")
     .select("*")

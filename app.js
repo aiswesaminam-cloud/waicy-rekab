@@ -1,3 +1,5 @@
+import { createAvailability } from "./availability.js";
+
 const API_BASE = "https://blvggoxdruqoeuuhqbdh.supabase.co/functions/v1/ride-demo";
 const ACTIVE_STATUSES = ["searching", "ride_found"];
 const KNOWN_STATUSES = ["searching", "ride_found", "cancelled", "booked"];
@@ -8,6 +10,9 @@ const PROGRESS_MESSAGES = [
   "Finding a suitable ride...",
   "Almost there...",
 ];
+const MIN_PASSENGERS = 1;
+const MAX_PASSENGERS = 4;
+const BOOKING_FADE_OUT_MS = 350;
 
 const panel = document.getElementById("panel");
 const errorBox = document.getElementById("error");
@@ -19,7 +24,16 @@ const elapsedEl = document.getElementById("elapsed");
 const driverEl = document.getElementById("driver-name");
 const vehicleEl = document.getElementById("vehicle");
 const plateEl = document.getElementById("plate");
-const etaEl = document.getElementById("eta");
+const availabilityWaitEl = document.getElementById("availability-wait");
+const availabilityMinutesEl = document.getElementById("availability-minutes");
+const availabilityArrivalEl = document.getElementById("availability-arrival");
+const passengerCountEl = document.getElementById("passengers-count");
+const passengerMinusButton = document.getElementById("passengers-minus");
+const passengerPlusButton = document.getElementById("passengers-plus");
+const bookingPickupEl = document.getElementById("booking-pickup");
+const bookingDestinationEl = document.getElementById("booking-destination");
+const bookingPassengersEl = document.getElementById("booking-passengers");
+const confirmedPassengersEl = document.getElementById("confirmed-passengers");
 const bookingRefEl = document.getElementById("booking-reference");
 const actionButtons = [...document.querySelectorAll(".btn")];
 
@@ -28,6 +42,11 @@ let version = 0;
 let pollInFlight = false;
 let actionInFlight = false;
 let pollTimer = null;
+let bookingStage = null;
+let passengerCount = MIN_PASSENGERS;
+let passengerSearchId = null;
+let availability = null;
+let availabilitySearchId = null;
 
 class ServiceError extends Error {
   constructor(message, code) {
@@ -65,7 +84,11 @@ async function callApi(action, payload = {}) {
 }
 
 function toSearch(data) {
-  if (typeof data?.search_id !== "string" || !KNOWN_STATUSES.includes(data.status)) {
+  if (
+    typeof data?.search_id !== "string" ||
+    !KNOWN_STATUSES.includes(data.status) ||
+    !Number.isInteger(data.passenger_count)
+  ) {
     throw new ServiceError("The ride service sent an unexpected response.");
   }
   return data;
@@ -92,15 +115,50 @@ function progressMessage(elapsedSeconds) {
   return PROGRESS_MESSAGES[index];
 }
 
+function passengerLabel(count) {
+  return `${count} ${count === 1 ? "Passenger" : "Passengers"}`;
+}
+
+function currentView() {
+  if (!search) return "idle";
+  if (search.status === "booked" || bookingStage === "pending") return "booking";
+  return search.status;
+}
+
+function renderAvailability() {
+  if (availabilitySearchId !== search.search_id) {
+    availability = createAvailability();
+    availabilitySearchId = search.search_id;
+  }
+  availabilityWaitEl.textContent = `${availability.waitMinutes} min`;
+  availabilityMinutesEl.textContent = `${availability.pickupMinutes} min`;
+  availabilityArrivalEl.textContent = availability.arrivalText;
+}
+
+function renderPassengers() {
+  passengerCountEl.textContent = String(passengerCount);
+  passengerMinusButton.disabled = actionInFlight || passengerCount <= MIN_PASSENGERS;
+  passengerPlusButton.disabled = actionInFlight || passengerCount >= MAX_PASSENGERS;
+}
+
 function render() {
-  const view = search ? search.status : "idle";
+  if (search && search.search_id !== passengerSearchId) {
+    passengerSearchId = search.search_id;
+    passengerCount = search.passenger_count;
+  }
+
+  const view = currentView();
   panel.dataset.view = view;
+  panel.dataset.phase = search?.status === "booked" ? "confirmed" : "booking";
   routeBox.hidden = !search;
 
   panel.querySelectorAll(".view").forEach((section) => {
-    section.hidden = section.dataset.for !== view;
+    const active = section.dataset.for === view;
+    section.hidden = !active;
+    section.classList.toggle("is-leaving", active && bookingStage === "leaving");
   });
 
+  renderPassengers();
   if (!search) return;
 
   pickupEl.textContent = search.pickup;
@@ -111,15 +169,22 @@ function render() {
     elapsedEl.textContent = String(search.elapsed_seconds);
   }
 
+  if (search.status === "ride_found") {
+    renderAvailability();
+  }
+
   if (search.ride) {
     driverEl.textContent = search.ride.driver_name;
     vehicleEl.textContent = search.ride.vehicle;
     plateEl.textContent = search.ride.plate;
-    etaEl.textContent = `${search.ride.eta_minutes} min (simulated)`;
   }
 
-  if (search.status === "booked") {
-    bookingRefEl.textContent = search.booking_reference;
+  if (view === "booking") {
+    bookingPickupEl.textContent = search.pickup;
+    bookingDestinationEl.textContent = search.destination;
+    bookingPassengersEl.textContent = passengerLabel(passengerCount);
+    confirmedPassengersEl.textContent = passengerLabel(passengerCount);
+    bookingRefEl.textContent = search.booking_reference ?? "";
   }
 }
 
@@ -183,6 +248,48 @@ async function runSearchAction(action) {
   }
 }
 
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+async function bookRide() {
+  if (actionInFlight || search?.status !== "ride_found") return;
+  const searchId = search.search_id;
+  actionInFlight = true;
+  setActionsDisabled(true);
+  bookingStage = "leaving";
+  render();
+
+  const request = callApi("confirm_demo_booking", {
+    search_id: searchId,
+    passenger_count: passengerCount,
+  }).then(
+    (data) => ({ ok: true, search: toSearch(data) }),
+    (err) => ({ ok: false, err }),
+  );
+
+  await sleep(BOOKING_FADE_OUT_MS);
+  bookingStage = "pending";
+  render();
+
+  const result = await request;
+  bookingStage = null;
+  if (result.ok) {
+    version += 1;
+    search = result.search;
+    passengerCount = search.passenger_count;
+    clearError();
+  } else {
+    showError(result.err.message);
+  }
+  actionInFlight = false;
+  setActionsDisabled(false);
+  render();
+}
+
+function changePassengers(delta) {
+  passengerCount = Math.min(MAX_PASSENGERS, Math.max(MIN_PASSENGERS, passengerCount + delta));
+  render();
+}
+
 function resetSearch() {
   version += 1;
   search = null;
@@ -193,7 +300,9 @@ function resetSearch() {
 
 document.getElementById("cancel-button").addEventListener("click", () => runSearchAction("cancel_ride_search"));
 document.getElementById("cancel-found-button").addEventListener("click", () => runSearchAction("cancel_ride_search"));
-document.getElementById("confirm-button").addEventListener("click", () => runSearchAction("confirm_demo_booking"));
+document.getElementById("book-button").addEventListener("click", bookRide);
+passengerMinusButton.addEventListener("click", () => changePassengers(-1));
+passengerPlusButton.addEventListener("click", () => changePassengers(1));
 panel.querySelectorAll("[data-reset]").forEach((button) => {
   button.addEventListener("click", resetSearch);
 });
