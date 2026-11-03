@@ -22,17 +22,18 @@ function finish() {
   handlers.onEnd();
 }
 
-export function startVoiceCall(handlers, passengerCount = 1) {
+export function startVoiceCall(handlers) {
   if (session) return;
   activeHandlers = handlers;
   try {
     session = client.createWebCall({
       agent_id: AGENT_ID,
-      retell_llm_dynamic_variables: { passenger_count: String(passengerCount) },
       audio: { emitRawAudioSamples: true },
       hooks: {
         onStatus: (status) => handlers.onStatus(status),
         onAudio: (samples) => handlers.onLevel(audioLevel(samples)),
+        onAgentStartTalking: () => handlers.onAgentTalking(true),
+        onAgentStopTalking: () => handlers.onAgentTalking(false),
         onEnd: () => finish(),
         onError: (err) => handlers.onError(err),
       },

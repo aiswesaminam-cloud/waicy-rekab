@@ -10,143 +10,133 @@
     <meta name="twitter:image" content="https://bolt.new/static/og_default.png">
   </head>
   <body>
-    <main class="page">
-      <header class="topbar">
-        <span class="brand">Rekab</span>
-        <span class="tag">AI ride demo</span>
-      </header>
+    <div class="device">
+      <div class="screen">
+        <main class="page">
+          <header class="topbar">
+            <span class="brand">Rekab</span>
+            <span class="tag">AI ride demo</span>
+          </header>
 
-      <div class="assistant">
-        <button class="assistant-toggle" type="button" id="assistant-toggle" aria-pressed="false">
-          <span class="assistant-word" aria-label="Rekab-AI"><span class="letter" style="--i:0" aria-hidden="true">R</span><span class="letter" style="--i:1" aria-hidden="true">e</span><span class="letter" style="--i:2" aria-hidden="true">k</span><span class="letter" style="--i:3" aria-hidden="true">a</span><span class="letter" style="--i:4" aria-hidden="true">b</span><span class="letter" style="--i:5" aria-hidden="true">-</span><span class="letter" style="--i:6" aria-hidden="true">A</span><span class="letter" style="--i:7" aria-hidden="true">I</span></span>
-          <span class="waveform" aria-hidden="true"><span style="--i:0"></span><span style="--i:1"></span><span style="--i:2"></span><span style="--i:3"></span><span style="--i:4"></span></span>
-        </button>
-        <div class="assistant-controls">
-          <p class="assistant-status" id="assistant-status" role="status" aria-live="polite"></p>
-          <button class="btn btn-ghost btn-compact" type="button" id="end-call-button" hidden>End call</button>
-        </div>
-      </div>
-
-      <section class="panel" id="panel" data-view="idle" data-phase="booking" aria-live="polite">
-        <div class="error" id="error" role="alert" hidden></div>
-
-        <div class="route" id="route" hidden>
-          <div class="route-row">
-            <span class="route-dot route-dot-pickup" aria-hidden="true"></span>
-            <div>
-              <p class="route-label">Pickup</p>
-              <p class="route-value" id="pickup"></p>
-            </div>
+          <div class="assistant">
+            <button class="assistant-toggle" type="button" id="assistant-toggle" aria-pressed="false" data-state="idle">
+              <span class="assistant-word" aria-label="Rekab-AI"><span class="letter" style="--i:0" aria-hidden="true">R</span><span class="letter" style="--i:1" aria-hidden="true">e</span><span class="letter" style="--i:2" aria-hidden="true">k</span><span class="letter" style="--i:3" aria-hidden="true">a</span><span class="letter" style="--i:4" aria-hidden="true">b</span><span class="letter" style="--i:5" aria-hidden="true">-</span><span class="letter" style="--i:6" aria-hidden="true">A</span><span class="letter" style="--i:7" aria-hidden="true">I</span></span>
+              <span class="waveform" aria-hidden="true"><span style="--i:0"></span><span style="--i:1"></span><span style="--i:2"></span><span style="--i:3"></span><span style="--i:4"></span></span>
+            </button>
+            <p class="assistant-status" id="assistant-status" role="status" aria-live="polite"></p>
           </div>
-          <div class="route-row">
-            <span class="route-dot route-dot-destination" aria-hidden="true"></span>
-            <div>
-              <p class="route-label">Destination</p>
-              <p class="route-value" id="destination"></p>
-            </div>
-          </div>
-        </div>
 
-        <div class="view" data-for="idle">
-          <h1 class="title">Ask Rekab AI for a ride</h1>
-          <p class="body-text">
-            Use the Rekab AI assistant to tell it where you are and where you want to go.
-            Your search will appear here as soon as it starts.
-          </p>
-        </div>
+          <section class="panel" id="panel" data-view="idle" data-phase="booking" aria-live="polite">
+            <div class="error" id="error" role="alert" hidden></div>
 
-        <div class="view" data-for="searching">
-          <div class="spinner" aria-hidden="true"></div>
-          <h2 class="title" id="search-message">Looking for available rides...</h2>
-          <p class="body-text">
-            Elapsed <span class="mono" id="elapsed">0</span>s
-          </p>
-          <p class="note">Simulated demo. No real drivers are involved.</p>
-          <button class="btn btn-ghost" type="button" id="cancel-button">Cancel search</button>
-        </div>
-
-        <div class="view" data-for="ride_found">
-          <p class="eyebrow">Simulated</p>
-          <h2 class="title">Ride Found!</h2>
-          <div class="availability">
-            <div class="availability-side">
-              <p class="availability-wait" id="availability-wait"></p>
-              <p class="availability-demand">HIGH DEMAND</p>
-            </div>
-            <div class="availability-side availability-side-right">
-              <p class="availability-free">FREE</p>
-              <p class="availability-minutes" id="availability-minutes"></p>
-              <p class="availability-arrival">Arrives <span id="availability-arrival"></span></p>
-            </div>
-          </div>
-          <div class="passengers">
-            <span class="passengers-label">Passengers</span>
-            <div class="stepper">
-              <button class="stepper-button" type="button" id="passengers-minus" aria-label="Remove a passenger">&minus;</button>
-              <span class="stepper-value" id="passengers-count" aria-live="polite">1</span>
-              <button class="stepper-button" type="button" id="passengers-plus" aria-label="Add a passenger">+</button>
-            </div>
-          </div>
-          <div class="actions">
-            <button class="btn btn-book" type="button" id="book-button">Book This Ride | Free</button>
-            <button class="btn btn-ghost" type="button" id="cancel-found-button">Cancel</button>
-          </div>
-          <dl class="ride-card">
-            <div>
-              <dt>Driver</dt>
-              <dd id="driver-name"></dd>
-            </div>
-            <div>
-              <dt>Vehicle</dt>
-              <dd id="vehicle"></dd>
-            </div>
-            <div>
-              <dt>Plate</dt>
-              <dd class="mono" id="plate"></dd>
-            </div>
-          </dl>
-          <p class="note">Driver and vehicle details are fictional.</p>
-        </div>
-
-        <div class="view" data-for="booking">
-          <div class="booking-screen">
-            <p class="booking-heading">Booking Your Trip...</p>
-            <div class="route booking-trip">
+            <div class="route" id="route" hidden>
               <div class="route-row">
                 <span class="route-dot route-dot-pickup" aria-hidden="true"></span>
                 <div>
-                  <p class="route-label">Pick up</p>
-                  <p class="route-value" id="booking-pickup"></p>
+                  <p class="route-label">Pickup</p>
+                  <p class="route-value" id="pickup"></p>
                 </div>
               </div>
               <div class="route-row">
                 <span class="route-dot route-dot-destination" aria-hidden="true"></span>
                 <div>
                   <p class="route-label">Destination</p>
-                  <p class="route-value" id="booking-destination"></p>
+                  <p class="route-value" id="destination"></p>
                 </div>
               </div>
             </div>
-            <p class="passenger-pill" id="booking-passengers"></p>
-            <div class="confirm-sheet">
-              <p class="eyebrow">Simulated</p>
-              <h2 class="title">Booking Confirmed</h2>
-              <p class="body-text">
-                <span id="confirmed-passengers"></span> &middot; Reference <span class="mono" id="booking-reference"></span>
-              </p>
-              <p class="note">This is a demo booking. No real ride was arranged.</p>
-              <button class="btn btn-light" type="button" data-reset>Book another ride</button>
-            </div>
-          </div>
-        </div>
 
-        <div class="view" data-for="cancelled">
-          <h2 class="title">Search cancelled</h2>
-          <p class="body-text">This simulated search has been cancelled. No booking was made.</p>
-          <button class="btn btn-primary" type="button" data-reset>Search again</button>
-        </div>
-      </section>
-    </main>
+            <div class="view" data-for="idle">
+              <h1 class="title">Ask Rekab AI for a ride</h1>
+              <p class="body-text">
+                Use the Rekab AI assistant to tell it where you are and where you want to go.
+                Your search will appear here as soon as it starts.
+              </p>
+            </div>
+
+            <div class="view" data-for="searching">
+              <div class="spinner" aria-hidden="true"></div>
+              <h2 class="title" id="search-message">Looking for available rides...</h2>
+              <p class="body-text">
+                Elapsed <span class="mono" id="elapsed">0</span>s
+              </p>
+              <p class="note">Simulated demo. No real drivers are involved.</p>
+              <button class="btn btn-ghost" type="button" id="cancel-button">Cancel search</button>
+            </div>
+
+            <div class="view" data-for="ride_found">
+              <p class="eyebrow">Simulated</p>
+              <h2 class="title">Ride Found!</h2>
+              <div class="availability">
+                <div class="availability-side">
+                  <p class="availability-wait" id="availability-wait"></p>
+                  <p class="availability-demand">HIGH DEMAND</p>
+                </div>
+                <div class="availability-side availability-side-right">
+                  <p class="availability-free">FREE</p>
+                  <p class="availability-minutes" id="availability-minutes"></p>
+                  <p class="availability-arrival">Arrives <span id="availability-arrival"></span></p>
+                </div>
+              </div>
+              <div class="actions">
+                <button class="btn btn-book" type="button" id="book-button">Book This Ride | Free</button>
+                <button class="btn btn-ghost" type="button" id="cancel-found-button">Cancel</button>
+              </div>
+              <dl class="ride-card">
+                <div>
+                  <dt>Driver</dt>
+                  <dd id="driver-name"></dd>
+                </div>
+                <div>
+                  <dt>Vehicle</dt>
+                  <dd id="vehicle"></dd>
+                </div>
+                <div>
+                  <dt>Plate</dt>
+                  <dd class="mono" id="plate"></dd>
+                </div>
+              </dl>
+              <p class="note">Driver and vehicle details are fictional.</p>
+            </div>
+
+            <div class="view" data-for="booking">
+              <div class="booking-screen">
+                <p class="booking-heading">Booking Your Trip...</p>
+                <div class="route booking-trip">
+                  <div class="route-row">
+                    <span class="route-dot route-dot-pickup" aria-hidden="true"></span>
+                    <div>
+                      <p class="route-label">Pick up</p>
+                      <p class="route-value" id="booking-pickup"></p>
+                    </div>
+                  </div>
+                  <div class="route-row">
+                    <span class="route-dot route-dot-destination" aria-hidden="true"></span>
+                    <div>
+                      <p class="route-label">Destination</p>
+                      <p class="route-value" id="booking-destination"></p>
+                    </div>
+                  </div>
+                </div>
+                <div class="confirm-sheet">
+                  <p class="eyebrow">Simulated</p>
+                  <h2 class="title">Booking Confirmed</h2>
+                  <p class="body-text">Reference <span class="mono" id="booking-reference"></span></p>
+                  <p class="note">This is a demo booking. No real ride was arranged.</p>
+                  <button class="btn btn-light" type="button" data-reset>Book another ride</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="view" data-for="cancelled">
+              <h2 class="title">Search cancelled</h2>
+              <p class="body-text">This simulated search has been cancelled. No booking was made.</p>
+              <button class="btn btn-primary" type="button" data-reset>Search again</button>
+            </div>
+          </section>
+        </main>
+      </div>
+    </div>
     <script type="module" src="./assistant.js"></script>
     <script type="module" src="./app.js"></script>
   </body>

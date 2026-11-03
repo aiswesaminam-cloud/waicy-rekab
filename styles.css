@@ -14,19 +14,18 @@
 
 body {
   margin: 0;
-  background: var(--grey-50);
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow-x: hidden;
+  padding: 32px 16px;
+  background: #e4e4e7;
   color: var(--ink);
   font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   font-weight: 400;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
-}
-
-.page {
-  min-height: 100vh;
-  max-width: 480px;
-  margin: 0 auto;
-  padding: 24px 16px 48px;
 }
 
 .topbar {
@@ -103,11 +102,11 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 3px;
-  width: 0;
+  width: 36px;
   height: 20px;
   overflow: hidden;
   opacity: 0;
-  transition: width 0.4s var(--ease), opacity 0.3s;
+  transition: opacity 0.3s;
 }
 
 .waveform span {
@@ -119,7 +118,6 @@ body {
 }
 
 .assistant-toggle[aria-pressed="true"] .waveform {
-  width: 36px;
   opacity: 1;
 }
 
@@ -133,6 +131,25 @@ body {
   transition: transform 0.12s linear;
 }
 
+.assistant-toggle[data-state="speaking"] .waveform span {
+  animation: wave 0.6s ease-in-out infinite;
+  animation-delay: calc(var(--i) * 0.08s);
+}
+
+.assistant-toggle[aria-pressed="true"] {
+  animation: halo 2.4s ease-in-out infinite;
+}
+
+@keyframes halo {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(17, 17, 17, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgba(17, 17, 17, 0);
+  }
+}
+
 @keyframes wave {
   0%,
   100% {
@@ -143,24 +160,10 @@ body {
   }
 }
 
-.assistant-controls {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 12px;
-  min-height: 24px;
-}
-
 .assistant-status {
   margin: 0;
   font-size: 14px;
   color: var(--muted);
-}
-
-.btn.btn-compact {
-  min-width: 0;
-  padding: 6px 16px;
-  font-size: 14px;
 }
 
 .panel {
@@ -469,65 +472,6 @@ body {
   font-variant-numeric: tabular-nums;
 }
 
-.passengers {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  width: 100%;
-}
-
-.passengers-label {
-  font-weight: 600;
-}
-
-.stepper {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.stepper-button {
-  width: 40px;
-  height: 40px;
-  font: inherit;
-  font-size: 20px;
-  line-height: 1;
-  color: var(--ink);
-  background: var(--white);
-  border: 1px solid var(--ink);
-  border-radius: 12px;
-  cursor: pointer;
-  transition: background-color 0.2s, opacity 0.2s;
-}
-
-.stepper-button:hover:not(:disabled) {
-  background: var(--grey-100);
-}
-
-.stepper-button:focus-visible {
-  outline: 2px solid var(--ink);
-  outline-offset: 2px;
-}
-
-.stepper-button:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
-}
-
-.stepper-value {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 56px;
-  height: 40px;
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-  background: var(--white);
-  border: 1px solid var(--grey-200);
-  border-radius: 12px;
-}
-
 .btn-book {
   min-width: 0;
   color: var(--white);
@@ -574,16 +518,6 @@ body {
 .booking-trip {
   margin: 0;
   background: var(--white);
-}
-
-.passenger-pill {
-  align-self: flex-start;
-  margin: 0;
-  padding: 6px 14px;
-  font-size: 14px;
-  font-weight: 600;
-  border: 1px solid var(--ink);
-  border-radius: 12px;
 }
 
 .confirm-sheet {

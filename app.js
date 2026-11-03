@@ -1,5 +1,4 @@
 import { createAvailability } from "./availability.js";
-import { getPassengerCount, setPassengerCount, MIN_PASSENGERS, MAX_PASSENGERS } from "./passengers.js";
 
 const API_BASE = "https://blvggoxdruqoeuuhqbdh.supabase.co/functions/v1/ride-demo";
 const ACTIVE_STATUSES = ["searching", "ride_found"];
@@ -26,13 +25,8 @@ const plateEl = document.getElementById("plate");
 const availabilityWaitEl = document.getElementById("availability-wait");
 const availabilityMinutesEl = document.getElementById("availability-minutes");
 const availabilityArrivalEl = document.getElementById("availability-arrival");
-const passengerCountEl = document.getElementById("passengers-count");
-const passengerMinusButton = document.getElementById("passengers-minus");
-const passengerPlusButton = document.getElementById("passengers-plus");
 const bookingPickupEl = document.getElementById("booking-pickup");
 const bookingDestinationEl = document.getElementById("booking-destination");
-const bookingPassengersEl = document.getElementById("booking-passengers");
-const confirmedPassengersEl = document.getElementById("confirmed-passengers");
 const bookingRefEl = document.getElementById("booking-reference");
 const actionButtons = [...document.querySelectorAll(".btn")];
 
@@ -42,7 +36,6 @@ let pollInFlight = false;
 let actionInFlight = false;
 let pollTimer = null;
 let bookingStage = null;
-let passengerCount = getPassengerCount();
 let availability = null;
 let availabilitySearchId = null;
 
@@ -84,8 +77,7 @@ async function callApi(action, payload = {}) {
 function toSearch(data) {
   if (
     typeof data?.search_id !== "string" ||
-    !KNOWN_STATUSES.includes(data.status) ||
-    !Number.isInteger(data.passenger_count)
+    !KNOWN_STATUSES.includes(data.status)
   ) {
     throw new ServiceError("The ride service sent an unexpected response.");
   }
@@ -113,10 +105,6 @@ function progressMessage(elapsedSeconds) {
   return PROGRESS_MESSAGES[index];
 }
 
-function passengerLabel(count) {
-  return `${count} ${count === 1 ? "Passenger" : "Passengers"}`;
-}
-
 function currentView() {
   if (!search) return "idle";
   if (search.status === "booked" || bookingStage === "pending") return "booking";
@@ -133,12 +121,6 @@ function renderAvailability() {
   availabilityArrivalEl.textContent = availability.arrivalText;
 }
 
-function renderPassengers() {
-  passengerCountEl.textContent = String(passengerCount);
-  passengerMinusButton.disabled = actionInFlight || passengerCount <= MIN_PASSENGERS;
-  passengerPlusButton.disabled = actionInFlight || passengerCount >= MAX_PASSENGERS;
-}
-
 function render() {
   const view = currentView();
   panel.dataset.view = view;
@@ -151,7 +133,6 @@ function render() {
     section.classList.toggle("is-leaving", active && bookingStage === "leaving");
   });
 
-  renderPassengers();
   if (!search) return;
 
   pickupEl.textContent = search.pickup;
@@ -175,8 +156,6 @@ function render() {
   if (view === "booking") {
     bookingPickupEl.textContent = search.pickup;
     bookingDestinationEl.textContent = search.destination;
-    bookingPassengersEl.textContent = passengerLabel(passengerCount);
-    confirmedPassengersEl.textContent = passengerLabel(passengerCount);
     bookingRefEl.textContent = search.booking_reference ?? "";
   }
 }
@@ -253,7 +232,6 @@ async function bookRide() {
 
   const request = callApi("confirm_demo_booking", {
     search_id: searchId,
-    passenger_count: passengerCount,
   }).then(
     (data) => ({ ok: true, search: toSearch(data) }),
     (err) => ({ ok: false, err }),
@@ -277,11 +255,6 @@ async function bookRide() {
   render();
 }
 
-function changePassengers(delta) {
-  passengerCount = setPassengerCount(passengerCount + delta);
-  render();
-}
-
 function resetSearch() {
   version += 1;
   search = null;
@@ -293,8 +266,6 @@ function resetSearch() {
 document.getElementById("cancel-button").addEventListener("click", () => runSearchAction("cancel_ride_search"));
 document.getElementById("cancel-found-button").addEventListener("click", () => runSearchAction("cancel_ride_search"));
 document.getElementById("book-button").addEventListener("click", bookRide);
-passengerMinusButton.addEventListener("click", () => changePassengers(-1));
-passengerPlusButton.addEventListener("click", () => changePassengers(1));
 panel.querySelectorAll("[data-reset]").forEach((button) => {
   button.addEventListener("click", resetSearch);
 });
