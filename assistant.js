@@ -1,4 +1,5 @@
 import { startVoiceCall, endVoiceCall } from "./voice.js";
+import { getPassengerCount } from "./passengers.js";
 
 const toggle = document.getElementById("assistant-toggle");
 const statusEl = document.getElementById("assistant-status");
@@ -49,12 +50,15 @@ function handleError() {
 toggle.addEventListener("click", () => {
   if (!IDLE_STATES.includes(state)) return;
   setState("connecting");
-  startVoiceCall({
-    onStatus: handleStatus,
-    onLevel: handleLevel,
-    onEnd: handleEnd,
-    onError: handleError,
-  });
+  startVoiceCall(
+    {
+      onStatus: handleStatus,
+      onLevel: handleLevel,
+      onEnd: handleEnd,
+      onError: handleError,
+    },
+    getPassengerCount(),
+  );
 });
 
 endButton.addEventListener("click", async () => {
