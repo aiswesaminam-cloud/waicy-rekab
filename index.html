@@ -15,7 +15,6 @@
         <main class="page">
           <header class="topbar">
             <span class="brand">Rekab</span>
-            <span class="tag">AI ride demo</span>
           </header>
 
           <div class="assistant">
@@ -24,6 +23,7 @@
               <span class="waveform" aria-hidden="true"><span style="--i:0"></span><span style="--i:1"></span><span style="--i:2"></span><span style="--i:3"></span><span style="--i:4"></span></span>
             </button>
             <p class="assistant-status" id="assistant-status" role="status" aria-live="polite"></p>
+            <button class="sound-toggle" type="button" id="sound-toggle" aria-pressed="false">Sound on</button>
           </div>
 
           <section class="panel" id="panel" data-view="idle" data-phase="booking" aria-live="polite">
@@ -60,12 +60,10 @@
               <p class="body-text">
                 Elapsed <span class="mono" id="elapsed">0</span>s
               </p>
-              <p class="note">Simulated demo. No real drivers are involved.</p>
               <button class="btn btn-ghost" type="button" id="cancel-button">Cancel search</button>
             </div>
 
             <div class="view" data-for="ride_found">
-              <p class="eyebrow">Simulated</p>
               <h2 class="title">Ride Found!</h2>
               <div class="availability">
                 <div class="availability-side">
@@ -82,21 +80,6 @@
                 <button class="btn btn-book" type="button" id="book-button">Book This Ride | Free</button>
                 <button class="btn btn-ghost" type="button" id="cancel-found-button">Cancel</button>
               </div>
-              <dl class="ride-card">
-                <div>
-                  <dt>Driver</dt>
-                  <dd id="driver-name"></dd>
-                </div>
-                <div>
-                  <dt>Vehicle</dt>
-                  <dd id="vehicle"></dd>
-                </div>
-                <div>
-                  <dt>Plate</dt>
-                  <dd class="mono" id="plate"></dd>
-                </div>
-              </dl>
-              <p class="note">Driver and vehicle details are fictional.</p>
             </div>
 
             <div class="view" data-for="booking">
@@ -119,10 +102,8 @@
                   </div>
                 </div>
                 <div class="confirm-sheet">
-                  <p class="eyebrow">Simulated</p>
                   <h2 class="title">Booking Confirmed</h2>
                   <p class="body-text">Reference <span class="mono" id="booking-reference"></span></p>
-                  <p class="note">This is a demo booking. No real ride was arranged.</p>
                   <button class="btn btn-light" type="button" data-reset>Book another ride</button>
                 </div>
               </div>
@@ -130,13 +111,14 @@
 
             <div class="view" data-for="cancelled">
               <h2 class="title">Search cancelled</h2>
-              <p class="body-text">This simulated search has been cancelled. No booking was made.</p>
+              <p class="body-text">Your search has been cancelled. No booking was made.</p>
               <button class="btn btn-primary" type="button" data-reset>Search again</button>
             </div>
           </section>
         </main>
       </div>
     </div>
+    <script type="module" src="./sound.js"></script>
     <script type="module" src="./assistant.js"></script>
     <script type="module" src="./app.js"></script>
   </body>

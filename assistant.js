@@ -1,4 +1,5 @@
 import { startVoiceCall, endVoiceCall } from "./voice.js";
+import { playCue } from "./sound.js";
 
 const toggle = document.getElementById("assistant-toggle");
 const statusEl = document.getElementById("assistant-status");
@@ -27,7 +28,10 @@ function setState(next) {
 
 function handleStatus(status) {
   if (status === "connecting") setState("connecting");
-  if (status === "live" && state === "connecting") setState("live");
+  if (status === "live" && state === "connecting") {
+    setState("live");
+    playCue("callLive");
+  }
   if (status === "ended" && state !== "error") setState("ended");
 }
 

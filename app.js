@@ -1,4 +1,5 @@
 import { createAvailability } from "./availability.js";
+import { playCue } from "./sound.js";
 
 const API_BASE = "https://blvggoxdruqoeuuhqbdh.supabase.co/functions/v1/ride-demo";
 const ACTIVE_STATUSES = ["searching", "ride_found"];
@@ -11,6 +12,7 @@ const PROGRESS_MESSAGES = [
   "Almost there...",
 ];
 const BOOKING_FADE_OUT_MS = 350;
+const STATUS_CUES = { searching: "searchStarted", ride_found: "rideFound" };
 
 const panel = document.getElementById("panel");
 const errorBox = document.getElementById("error");
@@ -19,9 +21,6 @@ const pickupEl = document.getElementById("pickup");
 const destinationEl = document.getElementById("destination");
 const searchMessageEl = document.getElementById("search-message");
 const elapsedEl = document.getElementById("elapsed");
-const driverEl = document.getElementById("driver-name");
-const vehicleEl = document.getElementById("vehicle");
-const plateEl = document.getElementById("plate");
 const availabilityWaitEl = document.getElementById("availability-wait");
 const availabilityMinutesEl = document.getElementById("availability-minutes");
 const availabilityArrivalEl = document.getElementById("availability-arrival");
@@ -147,12 +146,6 @@ function render() {
     renderAvailability();
   }
 
-  if (search.ride) {
-    driverEl.textContent = search.ride.driver_name;
-    vehicleEl.textContent = search.ride.vehicle;
-    plateEl.textContent = search.ride.plate;
-  }
-
   if (view === "booking") {
     bookingPickupEl.textContent = search.pickup;
     bookingDestinationEl.textContent = search.destination;
@@ -185,7 +178,10 @@ async function poll() {
   try {
     const next = await fetchCurrentSearch();
     if (startVersion === version) {
+      const previousStatus = search?.status;
       search = next;
+      const cue = STATUS_CUES[next?.status];
+      if (previousStatus && cue && previousStatus !== next.status) playCue(cue);
       clearError();
     }
   } catch (err) {
@@ -247,6 +243,7 @@ async function bookRide() {
     version += 1;
     search = result.search;
     clearError();
+    playCue("bookingConfirmed");
   } else {
     showError(result.err.message);
   }
