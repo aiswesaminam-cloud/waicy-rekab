@@ -1,5 +1,7 @@
 import { RetellClient } from "https://cdn.jsdelivr.net/npm/retell-client-js-sdk@3.0.3/+esm";
 
+import { getPassengerCount } from "./passengers.js";
+
 const PUBLIC_KEY = "public_key_b4166767a591c51e7a37d";
 const AGENT_ID = "agent_d2cd2d0a39ed74e304a68f29ad";
 
@@ -28,6 +30,7 @@ export function startVoiceCall(handlers) {
   try {
     session = client.createWebCall({
       agent_id: AGENT_ID,
+      retell_llm_dynamic_variables: { passenger_count: String(getPassengerCount()) },
       audio: { emitRawAudioSamples: true },
       hooks: {
         onStatus: (status) => handlers.onStatus(status),

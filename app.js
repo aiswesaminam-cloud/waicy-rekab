@@ -1,4 +1,5 @@
 import { createAvailability } from "./availability.js";
+import { getPassengerCount, setPassengerCount, MIN_PASSENGERS, MAX_PASSENGERS } from "./passengers.js";
 
 const API_BASE = "https://blvggoxdruqoeuuhqbdh.supabase.co/functions/v1/ride-demo";
 const ACTIVE_STATUSES = ["searching", "ride_found"];
@@ -10,8 +11,6 @@ const PROGRESS_MESSAGES = [
   "Finding a suitable ride...",
   "Almost there...",
 ];
-const MIN_PASSENGERS = 1;
-const MAX_PASSENGERS = 4;
 const BOOKING_FADE_OUT_MS = 350;
 
 const panel = document.getElementById("panel");
@@ -43,8 +42,7 @@ let pollInFlight = false;
 let actionInFlight = false;
 let pollTimer = null;
 let bookingStage = null;
-let passengerCount = MIN_PASSENGERS;
-let passengerSearchId = null;
+let passengerCount = getPassengerCount();
 let availability = null;
 let availabilitySearchId = null;
 
@@ -142,11 +140,6 @@ function renderPassengers() {
 }
 
 function render() {
-  if (search && search.search_id !== passengerSearchId) {
-    passengerSearchId = search.search_id;
-    passengerCount = search.passenger_count;
-  }
-
   const view = currentView();
   panel.dataset.view = view;
   panel.dataset.phase = search?.status === "booked" ? "confirmed" : "booking";
@@ -275,7 +268,6 @@ async function bookRide() {
   if (result.ok) {
     version += 1;
     search = result.search;
-    passengerCount = search.passenger_count;
     clearError();
   } else {
     showError(result.err.message);
@@ -286,7 +278,7 @@ async function bookRide() {
 }
 
 function changePassengers(delta) {
-  passengerCount = Math.min(MAX_PASSENGERS, Math.max(MIN_PASSENGERS, passengerCount + delta));
+  passengerCount = setPassengerCount(passengerCount + delta);
   render();
 }
 
