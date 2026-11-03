@@ -123,9 +123,14 @@ body {
   opacity: 1;
 }
 
-.assistant-toggle[aria-pressed="true"] .waveform span {
+.assistant-toggle[data-state="connecting"] .waveform span {
   animation: wave 1s ease-in-out infinite;
   animation-delay: calc(var(--i) * 0.12s);
+}
+
+.assistant-toggle[data-state="live"] .waveform span {
+  transform: scaleY(calc(0.3 + var(--level, 0) * (0.3 + var(--i) * 0.1)));
+  transition: transform 0.12s linear;
 }
 
 @keyframes wave {
@@ -138,15 +143,24 @@ body {
   }
 }
 
-.assistant-hint {
+.assistant-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  min-height: 24px;
+}
+
+.assistant-status {
   margin: 0;
   font-size: 14px;
   color: var(--muted);
-  animation: fade-in 0.4s var(--ease);
 }
 
-.assistant-hint[hidden] {
-  display: none;
+.btn.btn-compact {
+  min-width: 0;
+  padding: 6px 16px;
+  font-size: 14px;
 }
 
 .panel {

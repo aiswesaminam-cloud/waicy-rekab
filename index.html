@@ -29,7 +29,10 @@
           <span class="assistant-word" aria-label="Rekab-AI"><span class="letter" style="--i:0" aria-hidden="true">R</span><span class="letter" style="--i:1" aria-hidden="true">e</span><span class="letter" style="--i:2" aria-hidden="true">k</span><span class="letter" style="--i:3" aria-hidden="true">a</span><span class="letter" style="--i:4" aria-hidden="true">b</span><span class="letter" style="--i:5" aria-hidden="true">-</span><span class="letter" style="--i:6" aria-hidden="true">A</span><span class="letter" style="--i:7" aria-hidden="true">I</span></span>
           <span class="waveform" aria-hidden="true"><span style="--i:0"></span><span style="--i:1"></span><span style="--i:2"></span><span style="--i:3"></span><span style="--i:4"></span></span>
         </button>
-        <p class="assistant-hint" id="assistant-hint" hidden>Tap Talk to Rekab AI in the corner, then say your pickup and destination.</p>
+        <div class="assistant-controls">
+          <p class="assistant-status" id="assistant-status" role="status" aria-live="polite"></p>
+          <button class="btn btn-ghost btn-compact" type="button" id="end-call-button" hidden>End call</button>
+        </div>
       </div>
 
       <section class="panel" id="panel" data-view="idle" aria-live="polite">
@@ -115,6 +118,7 @@
         </div>
       </section>
     </main>
+    <script type="module" src="./assistant.js"></script>
     <script type="module" src="./app.js"></script>
   </body>
 </html>
