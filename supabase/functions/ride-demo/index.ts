@@ -108,10 +108,10 @@ async function advanceIfReady(row: SearchRow): Promise<SearchRow> {
 }
 
 const STATUS_MESSAGES: Record<SearchRow["status"], string> = {
-  searching: "Looking for available simulated rides.",
-  ride_found: "A simulated ride has been found.",
+  searching: "Search in progress. Do not start another search. Check the status again.",
+  ride_found: "Search finished. A simulated ride was found. Stop searching and do not say that you are searching.",
   cancelled: "This simulated search was cancelled.",
-  booked: "This simulated ride is booked.",
+  booked: "Search finished. The simulated ride is booked. Stop searching.",
 };
 
 function searchSummary(row: SearchRow) {
@@ -144,7 +144,20 @@ async function startRideSearch(body: Record<string, unknown>) {
   if (pickup.toLowerCase() === destination.toLowerCase()) {
     throw new DemoError(400, "invalid_input", "Pickup and destination must be different.");
   }
-  const readyAt = new Date(Date.now() + randomInt(6, 9) * 1000).toISOString();
+  const { data: active, error: activeError } = await db
+    .from(TABLE)
+    .select("*")
+    .eq("status", "searching")
+    .eq("pickup", pickup)
+    .eq("destination", destination)
+    .gte("created_at", new Date(Date.now() - ACTIVE_WINDOW_MINUTES * 60 * 1000).toISOString())
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  if (activeError) throw activeError;
+  if (active) return json({ success: true, ...searchSummary(await advanceIfReady(active as SearchRow)) });
+
+  const readyAt = new Date(Date.now() + randomInt(5, 15) * 1000).toISOString();
   const { data, error } = await db
     .from(TABLE)
     .insert({ pickup, destination, status: "searching", ready_at: readyAt })

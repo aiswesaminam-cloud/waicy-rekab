@@ -13,6 +13,7 @@ const PROGRESS_MESSAGES = [
 ];
 const BOOKING_FADE_OUT_MS = 350;
 const STATUS_CUES = { searching: "searchStarted", ride_found: "rideFound" };
+const STATUS_RANK = { searching: 0, ride_found: 1, booked: 2, cancelled: 2 };
 
 const panel = document.getElementById("panel");
 const errorBox = document.getElementById("error");
@@ -179,9 +180,15 @@ async function poll() {
     const next = await fetchCurrentSearch();
     if (startVersion === version) {
       const previousStatus = search?.status;
-      search = next;
-      const cue = STATUS_CUES[next?.status];
-      if (previousStatus && cue && previousStatus !== next.status) playCue(cue);
+      const regressed =
+        next !== null &&
+        search?.search_id === next.search_id &&
+        STATUS_RANK[next.status] < STATUS_RANK[previousStatus];
+      if (!regressed) {
+        search = next;
+        const cue = STATUS_CUES[next?.status];
+        if (previousStatus && cue && previousStatus !== next.status) playCue(cue);
+      }
       clearError();
     }
   } catch (err) {
