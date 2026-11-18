@@ -6,13 +6,13 @@ const statusEl = document.getElementById("assistant-status");
 
 const CALL_STATES = ["connecting", "live", "speaking"];
 const STATUS_TEXT = {
-  idle: "Tap Rekab AI to talk to the ride assistant.",
-  connecting: "Connecting to Rekab AI...",
+  idle: "Tap Rekabi AI to talk to the ride assistant.",
+  connecting: "Connecting to Rekabi AI...",
   live: "Listening. Say your pickup and destination.",
-  speaking: "Rekab AI is speaking...",
+  speaking: "Rekabi AI is speaking...",
   ending: "Ending call...",
-  ended: "Call ended. Tap Rekab AI to start again.",
-  error: "The call could not continue. Tap Rekab AI to try again.",
+  ended: "Call ended. Tap Rekabi AI to start again.",
+  error: "The call could not continue. Tap Rekabi AI to try again.",
 };
 
 let state = "idle";
